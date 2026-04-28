@@ -42,4 +42,7 @@ class PowerUp {
   void move() {
     y = y + speed;
   }
+  
+  
+  
 }

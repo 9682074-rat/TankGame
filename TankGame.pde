@@ -17,6 +17,16 @@ void setup() {
   obsTimer.start();
 }
 
+void scorePanel() {
+  fill(#111f36, #111f36);
+  rectMode(CENTER);
+  rect(width/2, 30, width, 60);
+  textAlign(CENTER);
+  fill(#c7cdd6);
+  textSize(43);
+  text("Score:" + score, width/2, 50);
+}
+
 void draw() {
   background(#000000);
   imageMode(CORNER);
@@ -28,7 +38,7 @@ void draw() {
   }
   //obstacles.add(new Obstacle(250, 250));
 
-  //Displaying obstacles
+  //Displaying and removing obstacles
   for (int i = 0; i < obstacles.size(); i++) {
     Obstacle obs = obstacles.get(i);
     obs.display();
@@ -36,10 +46,22 @@ void draw() {
     if (obs.reachedEdge()) {
       obstacles.remove(i);
     }
+    if(tank1.intersect(obs)) {
+    //impact to change score, health, and obstacle
+    }
   }
   //Displaying projectiles
   for (int i = 0; i < projectiles.size(); i++) {
     Projectile p = projectiles.get(i);
+    for(int j = 0; j < obstacles.size(); j++) {
+    Obstacle obs = obstacles.get(j);
+    if(p.intersect(obs)) {
+    score = score +100;
+    projectiles.remove(i);
+    obstacles.remove(j);
+    continue;
+    }
+    }
     p.display();
     p.move();
     if (p.reachedEdge()) {
@@ -48,16 +70,8 @@ void draw() {
   }
   tank1.display();
   scorePanel();
-}
-
-void scorePanel() {
-  fill(#111f36, #111f36);
-  rectMode(CENTER);
-  rect(width/2, 30, width, 60);
-  textAlign(CENTER);
-  fill(#c7cdd6);
-  textSize(43);
-  text("Score:" + score, width/2, 50);
+  println("Objects in memory:" +obstacles.size());
+  println("Projectiles iun Memory:" +projectiles.size());
 }
 
 void keyPressed() {

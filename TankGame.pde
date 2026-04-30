@@ -1,10 +1,11 @@
 // Rat Parry | Apr 14 2026 | TankGame
-PImage bg;
 Tank tank1;
 ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
+ArrayList<PowerUp> powerups = new ArrayList<PowerUp>();
+PImage bg;
 int score;
-Timer obsTimer;
+Timer objTimer, puTimer;
 
 void setup() {
   size(500, 500);
@@ -13,8 +14,10 @@ void setup() {
   //obstacles.add(new Obstacle(180, 180));
   //obstacles.add(new Obstacle(380, 330));
   score = 0;
-  obsTimer = new Timer(1000);
-  obsTimer.start();
+  objTimer = new Timer(1000);
+  objTimer.start();
+  puTimer = new Timer(5000);
+  puTimer.start();
 }
 
 void scorePanel() {
@@ -24,19 +27,53 @@ void scorePanel() {
   textAlign(CENTER);
   fill(#c7cdd6);
   textSize(43);
+  textAlign(CENTER);
   text("Score:" + score, width/2, 50);
+  text("Health:" + tank1.health, width/2-150, 25);
+  text("Ammo:" + tank1.laserCount, width/2+150, 25);
 }
 
 void draw() {
   background(#000000);
   imageMode(CORNER);
   image(bg, 0, 0);
+
   //Add timer to distribute obstacles
-  if (obsTimer.isFinished()) {
+  if (objTimer.isFinished()) {
     obstacles.add(new Obstacle(-100, int(random(height))));
-    obsTimer.start();
+    objTimer.start();
   }
-  //obstacles.add(new Obstacle(250, 250));
+
+  //Distribute powerups on a timer
+  if (puTimer.isFinished()) {
+    //add powerup
+    powerups.add(new PowerUp());
+    // Restart Timer
+    puTimer.start();
+  }
+
+  //Display and remove powerups
+  for (int i = 0; i < powerups.size(); i++) {
+    PowerUp pu = powerups.get(i);
+    pu.display();
+    pu.move();
+
+    if (pu.reachedEdge()) {
+      powerups.remove(pu);
+    }
+    if (pu.intersect(tank1)) {
+      if (pu.type == 'h') {
+        tank1.health = tank1.health + 100;
+        powerups.remove(pu);
+      } else if (pu.type == 'a') {
+        tank1.laserCount = tank1.laserCount + 100;
+        powerups.remove(pu);
+      } else if (pu.type == 'a') {
+        tank1.turretCount = tank1.turretCount + 1;
+        powerups.remove(pu);
+      }
+    }
+  }
 
   //Displaying and removing obstacles
   for (int i = 0; i < obstacles.size(); i++) {
@@ -46,21 +83,21 @@ void draw() {
     if (obs.reachedEdge()) {
       obstacles.remove(i);
     }
-    if(tank1.intersect(obs)) {
-    //impact to change score, health, and obstacle
+    if (tank1.intersect(obs)) {
+      //impact to change score, health, and obstacle
     }
   }
   //Displaying projectiles
   for (int i = 0; i < projectiles.size(); i++) {
     Projectile p = projectiles.get(i);
-    for(int j = 0; j < obstacles.size(); j++) {
-    Obstacle obs = obstacles.get(j);
-    if(p.intersect(obs)) {
-    score = score +100;
-    projectiles.remove(i);
-    obstacles.remove(j);
-    continue;
-    }
+    for (int j = 0; j < obstacles.size(); j++) {
+      Obstacle obs = obstacles.get(j);
+      if (p.intersect(obs)) {
+        score = score +100;
+        projectiles.remove(i);
+        obstacles.remove(j);
+        continue;
+      }
     }
     p.display();
     p.move();
@@ -87,5 +124,12 @@ void keyPressed() {
 }
 
 void mousePressed() {
-  projectiles.add(new Projectile(tank1.x, tank1.y));
+  if (tank1.turretCount = 1) {
+    projectiles.add(new Projectile(tank1.x-20, tank1.y, dx * speed, dy * speed));
+  } else if (tank1.turretCount==2) {
+    projectiles.add(new Projectile(tank1.x-20, tank1.y, dx * speed, dy * speed));
+
+    projectiles.add(new Projectile(tank1.x-20, tank1.y, dx * speed, dy * speed));
+  }
+  //projectiles.add(new Projectile(tank1.x-20, tank1.y, dx * speed, dy * speed));
 }
